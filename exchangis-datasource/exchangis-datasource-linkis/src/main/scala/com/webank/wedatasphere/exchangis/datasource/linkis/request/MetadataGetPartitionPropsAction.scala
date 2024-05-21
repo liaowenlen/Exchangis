@@ -1,6 +1,6 @@
 package com.webank.wedatasphere.exchangis.datasource.linkis.request
 
-import org.apache.linkis.datasource.client.config.DatasourceClientConfig.METADATA_SERVICE_MODULE
+import org.apache.linkis.datasource.client.config.DatasourceClientConfig.METADATA_OLD_SERVICE_MODULE
 import org.apache.linkis.datasource.client.request.DataSourceAction
 import org.apache.linkis.httpclient.request.GetAction
 
@@ -25,7 +25,7 @@ class MetadataGetPartitionPropsAction extends GetAction with DataSourceAction{
    */
   private var partition: String = _
 
-  override def suffixURLs: Array[String] = Array(METADATA_SERVICE_MODULE.getValue, "props", dataSourceId.toString, "db", database, "table", table, "partition", partition)
+  override def suffixURLs: Array[String] = Array(METADATA_OLD_SERVICE_MODULE.getValue, "props", dataSourceId.toString, "db", database, "table", table, "partition", partition)
 
   private var user: String = _
 
