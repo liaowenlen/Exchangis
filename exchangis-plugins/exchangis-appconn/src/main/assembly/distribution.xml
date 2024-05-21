@@ -73,6 +73,7 @@
             <directory>${basedir}/src/main/resources</directory>
             <includes>
                 <include>sqoop.icon</include>
+                <include>datax.icon</include>
             </includes>
             <fileMode>0777</fileMode>
             <outputDirectory>icons</outputDirectory>
