@@ -82,6 +82,22 @@ public final class OriginalConfPretreatmentUtil {
                 if(parameter != null && parameter.length() != 0){
                     jdbcUrl = Key.JDBCTEM + map.get(Key.HOST).toString() + ":" + map.get(Key.PORT).toString() + "/" + map.get(Key.DATABASE).toString() + "?" + parameter;
                 }
+            } else if (DATABASE_TYPE.equals(DataBaseType.Kingbase)) {
+                Map<String, Object> map = connConf.getMap(Key.JDBC_URL);
+                String parameter = "";
+                Map<String, Object> parameterMap = originalConfig.getMap(Key.CONNPARM, new HashMap<>());
+                for (String key : map.keySet()) {
+                    if (key.equals(Key.CONNPARM)) {
+                        parameterMap.putAll((Map<String, Object>) map.get(key));
+                    }
+                }
+                parameter = parameterMap.entrySet().stream().map(
+                        e -> String.join("=", e.getKey(), String.valueOf(e.getValue()))
+                ).collect(Collectors.joining("&"));
+                jdbcUrl = Key.JDBCKINGBASE + map.get(Key.HOST).toString() + ":" + map.get(Key.PORT).toString() + "/" + map.get(Key.INSTANCE).toString();
+                if (parameter != null && parameter.length() != 0) {
+                    jdbcUrl = Key.JDBCKINGBASE + map.get(Key.HOST).toString() + ":" + map.get(Key.PORT).toString() + "/" + map.get(Key.INSTANCE).toString() + "?" + parameter;
+                }
             }  else if (DATABASE_TYPE.equals(DataBaseType.Oracle)){
                 Map<String,Object> map = connConf.getMap(com.alibaba.datax.plugin.rdbms.reader.Key.JDBC_URL);
 

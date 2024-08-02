@@ -117,6 +117,26 @@ public final class OriginalConfPretreatmentUtil {
                     }
                     jdbcUrls.add(jcUrl);
                 }
+            } else if (DATABASE_TYPE.equals(DataBaseType.Kingbase)) {
+                List<Object> jdbcUrlObjects = connConf.getList(Key.JDBC_URL);
+                for (Object obj : jdbcUrlObjects) {
+                    Map<String, Object> map = (Map<String, Object>) obj;
+                    String parameter = "";
+                    Map<String, Object> parameterMap = originalConfig.getMap(Key.CONNPARM, new HashMap<>());
+                    for (String key : map.keySet()) {
+                        if (key.equals(Key.CONNPARM)) {
+                            parameterMap.putAll((Map<String, Object>) map.get(key));
+                        }
+                    }
+                    parameter = parameterMap.entrySet().stream().map(
+                            e -> String.join("=", e.getKey(), String.valueOf(e.getValue()))
+                    ).collect(Collectors.joining("&"));
+                    String jcUrl = Key.JDBCKINGBASE + map.get(Key.HOST).toString() + ":" + map.get(Key.PORT).toString() + "/" + map.get(Key.INSTANCE).toString();
+                    if (parameter.length() != 0) {
+                        jcUrl = Key.JDBCKINGBASE + map.get(Key.HOST).toString() + ":" + map.get(Key.PORT).toString() + "/" + map.get(Key.INSTANCE).toString() + "?" + parameter;
+                    }
+                    jdbcUrls.add(jcUrl);
+                }
             } else if (DATABASE_TYPE.equals(DataBaseType.Oracle)){
                 List<Object> jdbcUrlObjects = connConf.getList(Key.JDBC_URL);
                 for(Object obj : jdbcUrlObjects){

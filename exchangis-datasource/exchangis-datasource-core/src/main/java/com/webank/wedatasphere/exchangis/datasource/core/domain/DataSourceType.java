@@ -2,9 +2,13 @@ package com.webank.wedatasphere.exchangis.datasource.core.domain;
 
 public enum DataSourceType {
 
+    DORIS("DORIS"),
+
     ELASTICSEARCH("ELASTICSEARCH"),
 
     HIVE("HIVE"),
+
+    KINGBASE("KINGBASE"),
 
     MONGODB("MONGODB"),
 

@@ -1,0 +1,16 @@
+{
+    "name": "kingbasewriter",
+    "parameter": {
+        "username": "",
+        "password": "",
+        "column": [],
+        "preSql": [],
+        "connection": [
+            {
+                "jdbcUrl": "",
+                "table": []
+            }
+        ],
+        "postSql": []
+    }
+}

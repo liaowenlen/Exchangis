@@ -46,6 +46,8 @@
         <module>datax-oraclereader</module>
         <module>datax-oraclewriter</module>
         <module>datax-assembly</module>
+        <module>datax-kingbasereader</module>
+        <module>datax-kingbasewriter</module>
     </modules>
     <dependencyManagement>
         <dependencies>

@@ -55,6 +55,14 @@
             <directory>../datax-oraclewriter/target/plugin</directory>
             <outputDirectory>/</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>../datax-kingbasereader/target/plugin</directory>
+            <outputDirectory>/</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>../datax-kingbasewriter/target/plugin</directory>
+            <outputDirectory>/</outputDirectory>
+        </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>

@@ -24,6 +24,8 @@
         <module>extension-datasources/exchangis-datasource-ext-elasticsearch</module>
         <module>extension-datasources/exchangis-datasource-ext-mongodb</module>
         <module>extension-datasources/exchangis-datasource-ext-oracle</module>
+        <module>extension-datasources/exchangis-datasource-ext-kingbase</module>
+        <module>extension-datasources/exchangis-datasource-ext-doris</module>
         <module>exchangis-datasource-server</module>
     </modules>
 

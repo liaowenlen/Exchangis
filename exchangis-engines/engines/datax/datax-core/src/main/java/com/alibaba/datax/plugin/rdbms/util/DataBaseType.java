@@ -18,7 +18,9 @@ public enum DataBaseType {
     PostgreSQL("postgresql", "org.postgresql.Driver"),
     RDBMS("rdbms", "DataBaseType"),
     DB2("db2", "com.ibm.db2.jcc.DB2Driver"),
-    ADS("ads", "com.mysql.jdbc.Driver");
+    ADS("ads", "com.mysql.jdbc.Driver"),
+    Doris("doris", "com.mysql.jdbc.Driver"),
+    Kingbase("kingbase", "com.kingbase8.Driver");
 
 
     private String typeName;
@@ -53,6 +55,8 @@ public enum DataBaseType {
             case DB2:
                 break;
             case PostgreSQL:
+                break;
+            case Kingbase:
                 break;
             case RDBMS:
                 break;

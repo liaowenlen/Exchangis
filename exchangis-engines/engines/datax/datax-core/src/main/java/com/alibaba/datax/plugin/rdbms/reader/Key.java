@@ -58,9 +58,13 @@ public final class Key {
 
     public final static String DATABASE = "database";
 
+    public final static String INSTANCE = "instance";
+
     public final static String JDBCTEM = "jdbc:mysql://";
 
     public final static String JDBCORCL = "jdbc:oracle:thin:@";
+
+    public final static String JDBCKINGBASE = "jdbc:kingbase8://";
 
     public final static String SID = "sid";
 

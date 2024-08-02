@@ -1,6 +1,7 @@
 package com.webank.wedatasphere.exchangis.job.server.builder.transform;
 
 import com.webank.wedatasphere.exchangis.common.linkis.bml.BmlResource;
+import com.webank.wedatasphere.exchangis.datasource.core.domain.DataSourceType;
 import com.webank.wedatasphere.exchangis.datasource.core.utils.Json;
 import com.webank.wedatasphere.exchangis.datasource.core.vo.ExchangisJobInfoContent;
 import com.webank.wedatasphere.exchangis.job.builder.ExchangisJobBuilderContext;
@@ -104,16 +105,32 @@ public class GenericExchangisTransformJobBuilder extends AbstractLoggingExchangi
                         if(StringUtils.isBlank(subExchangisJob.getEngineType())){
                             subExchangisJob.setEngineType(inputJob.getEngineType());
                         }
-                        SubExchangisJobHandler sourceHandler = handlerHolders.get( StringUtils
-                                .isNotBlank(subExchangisJob.getSourceType())? subExchangisJob.getSourceType().toLowerCase():"");
+                        String sourceType = subExchangisJob.getSourceType();
+                        if (StringUtils.isNotBlank(sourceType)) {
+                            if (DataSourceType.DORIS.name().equals(sourceType)) {
+                                sourceType = DataSourceType.MYSQL.name;
+                            }
+                            sourceType = sourceType.toLowerCase();
+                        } else {
+                            sourceType = "";
+                        }
+                        SubExchangisJobHandler sourceHandler = handlerHolders.get(sourceType);
                         if(Objects.isNull(sourceHandler)){
                             LOG.warn("Not find source handler for subJob named: [{}], sourceType: [{}], " +
                                             "ExchangisJob: id: [{}], name: [{}], use default instead",
                                     subExchangisJob.getName(), subExchangisJob.getSourceType(), inputJob.getId(), inputJob.getName());
                             sourceHandler = handlerHolders.get(SubExchangisJobHandler.DEFAULT_DATA_SOURCE_TYPE);
                         }
-                        SubExchangisJobHandler sinkHandler = handlerHolders.get( StringUtils
-                                .isNotBlank(subExchangisJob.getSinkType())? subExchangisJob.getSinkType().toLowerCase():"");
+                        String sinkType = subExchangisJob.getSinkType();
+                        if (StringUtils.isNotBlank(sinkType)) {
+                            if (DataSourceType.DORIS.name().equals(sinkType)) {
+                                sinkType = DataSourceType.MYSQL.name;
+                            }
+                            sinkType = sinkType.toLowerCase();
+                        } else {
+                            sinkType = "";
+                        }
+                        SubExchangisJobHandler sinkHandler = handlerHolders.get(sinkType);
                         if(Objects.isNull(sinkHandler)){
                             LOG.warn("Not find sink handler for subJob named: [{}], sinkType: [{}], ExchangisJob: id: [{}], name: [{}], use default instead",
                                     subExchangisJob.getName(), subExchangisJob.getSourceType(), inputJob.getId(), inputJob.getName());

@@ -1,6 +1,7 @@
 package com.webank.wedatasphere.exchangis.job.server.builder.engine;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.webank.wedatasphere.exchangis.datasource.core.domain.DataSourceType;
 import com.webank.wedatasphere.exchangis.datasource.core.utils.Json;
 import com.webank.wedatasphere.exchangis.engine.domain.EngineBmlResource;
 import com.webank.wedatasphere.exchangis.engine.resource.loader.datax.DataxEngineResourceConf;
@@ -19,7 +20,12 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Datax engine job builder
@@ -66,7 +72,7 @@ public class DataxExchangisEngineJobBuilder extends AbstractResourceEngineJobBui
      * Source content
      */
     private static final JobParamDefine<String> PLUGIN_SOURCE_NAME = JobParams.define("content[0].reader.name", job ->
-            getPluginName(job.getSourceType(), "reader"), SubExchangisJob.class);
+            getPluginName(job.getSourceType().equals(DataSourceType.DORIS.name) ? DataSourceType.MYSQL.name : job.getSourceType(), "reader"), SubExchangisJob.class);
 
     private static final JobParamDefine<Map<String, Object>> PLUGIN_SOURCE_PARAM = JobParams.define("content[0].reader.parameter", job ->
             job.getParamsToMap(SubExchangisJob.REALM_JOB_CONTENT_SOURCE, false), SubExchangisJob.class);
@@ -75,7 +81,7 @@ public class DataxExchangisEngineJobBuilder extends AbstractResourceEngineJobBui
      * Sink content
      */
     private static final JobParamDefine<String> PLUGIN_SINK_NAME = JobParams.define("content[0]].writer.name", job ->
-            getPluginName(job.getSinkType(), "writer"), SubExchangisJob.class);
+            getPluginName(job.getSinkType().equals(DataSourceType.DORIS.name) ? DataSourceType.MYSQL.name : job.getSinkType(), "writer"), SubExchangisJob.class);
 
     private static final JobParamDefine<Map<String, Object>> PLUGIN_SINK_PARAM = JobParams.define("content[0].writer.parameter", job ->
             job.getParamsToMap(SubExchangisJob.REALM_JOB_CONTENT_SINK, false), SubExchangisJob.class);

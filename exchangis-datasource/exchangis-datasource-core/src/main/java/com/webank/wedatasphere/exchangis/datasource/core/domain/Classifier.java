@@ -2,9 +2,13 @@ package com.webank.wedatasphere.exchangis.datasource.core.domain;
 
 public enum Classifier {
 
+    DORIS("大数据存储"),
+
     ELASTICSEARCH("分布式全文索引"),
 
     HIVE("大数据存储"),
+
+    KINGBASE("关系型数据库"),
 
     MONGODB("非关系型数据库"),
 
