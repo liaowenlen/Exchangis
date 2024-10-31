@@ -1,9 +1,11 @@
 package com.webank.wedatasphere.exchangis.job.server.builder.transform;
 
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.webank.wedatasphere.exchangis.common.linkis.bml.BmlResource;
 import com.webank.wedatasphere.exchangis.datasource.core.domain.DataSourceType;
 import com.webank.wedatasphere.exchangis.datasource.core.utils.Json;
 import com.webank.wedatasphere.exchangis.datasource.core.vo.ExchangisJobInfoContent;
+import com.webank.wedatasphere.exchangis.datasource.core.vo.ExchangisJobParamsContent;
 import com.webank.wedatasphere.exchangis.job.builder.ExchangisJobBuilderContext;
 import com.webank.wedatasphere.exchangis.job.domain.ExchangisJobInfo;
 import com.webank.wedatasphere.exchangis.job.domain.SubExchangisJob;
@@ -18,11 +20,18 @@ import com.webank.wedatasphere.exchangis.job.server.utils.SpringContextHolder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.linkis.common.exception.ErrorException;
 import org.apache.linkis.common.utils.ClassUtils;
+import org.eclipse.jetty.util.ajax.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -89,6 +98,44 @@ public class GenericExchangisTransformJobBuilder extends AbstractLoggingExchangi
                             inputJob.getId(), inputJob.getName(), contents.size());
                     //Second to new SubExchangisJob instances
                     List<SubExchangisJob> subExchangisJobs = contents.stream().map(job -> {
+                                // 解析任务变量
+                                {
+                                    String jobParams = inputJob.getJobParams();
+                                    if (StringUtils.isNotBlank(jobParams)) {
+                                        Map<String, String> paramMap = (Map<String, String>) JSON.parse(jobParams);
+                                        ExchangisJobParamsContent params = job.getParams();
+                                        List<ExchangisJobParamsContent.ExchangisJobParamsItem> sources = params.getSources();
+                                        List<ExchangisJobParamsContent.ExchangisJobParamsItem> sinks = params.getSinks();
+                                        if (CollectionUtils.isNotEmpty(sources)) {
+                                            for (ExchangisJobParamsContent.ExchangisJobParamsItem source : sources) {
+                                                String configValue = String.valueOf(source.getConfigValue());
+                                                if (StringUtils.isNotEmpty(configValue)) {
+                                                    for (String key : paramMap.keySet()) {
+                                                        if (configValue.contains("${" + key + "}")) {
+                                                            source.setConfigValue(StringUtils.replace(configValue, "${" + key + "}", paramMap.get(key)));
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                                break;
+                                            }
+                                        }
+                                        if (CollectionUtils.isNotEmpty(sinks)) {
+                                            for (ExchangisJobParamsContent.ExchangisJobParamsItem sink : sinks) {
+                                                String configValue = String.valueOf(sink.getConfigValue());
+                                                if (StringUtils.isNotEmpty(configValue)) {
+                                                    for (String key : paramMap.keySet()) {
+                                                        if (configValue.contains("${" + key + "}")) {
+                                                            sink.setConfigValue(StringUtils.replace(configValue, "${" + key + "}", paramMap.get(key)));
+                                                            break;
+                                                        }
+                                                    }
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                                 TransformExchangisJob.TransformSubExchangisJob transformSubJob = new TransformExchangisJob.TransformSubExchangisJob(job);
                                 transformSubJob.setId(inputJob.getId());
                                 transformSubJob.setCreateUser(outputJob.getCreateUser());
