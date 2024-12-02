@@ -6,23 +6,40 @@ import com.alibaba.datax.common.exception.DataXException;
 import com.alibaba.datax.common.plugin.RecordReceiver;
 import com.alibaba.datax.common.plugin.TaskPluginCollector;
 import com.alibaba.datax.common.util.Configuration;
-import com.webank.wedatasphere.exchangis.datax.core.job.meta.MetaSchema;
 import com.alibaba.datax.core.util.LdapUtil;
 import com.alibaba.datax.plugin.utils.HdfsUserGroupInfoLock;
 import com.google.common.collect.Lists;
 import com.webank.wedatasphere.exchangis.datax.common.CryptoUtils;
 import com.webank.wedatasphere.exchangis.datax.common.ldap.LdapConnector;
+import com.webank.wedatasphere.exchangis.datax.core.job.meta.MetaSchema;
 import com.webank.wedatasphere.exchangis.datax.util.Json;
 import com.webank.wedatasphere.exchangis.datax.util.KerberosUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.hadoop.fs.*;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.GlobFilter;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
+import org.apache.hadoop.hive.common.type.HiveDecimal;
+import org.apache.hadoop.hive.common.type.Timestamp;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.IMetaStoreClient;
 import org.apache.hadoop.hive.metastore.Warehouse;
-import org.apache.hadoop.hive.metastore.api.*;
-import org.apache.hadoop.hive.ql.io.*;
+import org.apache.hadoop.hive.metastore.api.FieldSchema;
+import org.apache.hadoop.hive.metastore.api.Order;
+import org.apache.hadoop.hive.metastore.api.Partition;
+import org.apache.hadoop.hive.metastore.api.SerDeInfo;
+import org.apache.hadoop.hive.metastore.api.StorageDescriptor;
+import org.apache.hadoop.hive.metastore.api.Table;
+import org.apache.hadoop.hive.ql.io.AvroStorageFormatDescriptor;
+import org.apache.hadoop.hive.ql.io.ORCFileStorageFormatDescriptor;
+import org.apache.hadoop.hive.ql.io.ParquetFileStorageFormatDescriptor;
+import org.apache.hadoop.hive.ql.io.RCFileStorageFormatDescriptor;
+import org.apache.hadoop.hive.ql.io.SequenceFileStorageFormatDescriptor;
+import org.apache.hadoop.hive.ql.io.TextFileStorageFormatDescriptor;
 import org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat;
 import org.apache.hadoop.hive.ql.io.orc.OrcSerde;
 import org.apache.hadoop.hive.ql.io.orc.OrcStruct;
@@ -34,16 +51,31 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
-import org.apache.hadoop.mapred.*;
+import org.apache.hadoop.mapred.FileOutputFormat;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.JobContext;
+import org.apache.hadoop.mapred.RecordWriter;
+import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.security.PrivilegedExceptionAction;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 import static com.alibaba.datax.plugin.writer.hdfswriter.Key.HIVE_KEBEROS_PRINCIPAL;
 import static org.apache.hadoop.fs.FileSystem.FS_DEFAULT_NAME_KEY;
@@ -676,7 +708,7 @@ public class HdfsWriterUtil {
                         objectInspector = ObjectInspectorFactory.getReflectionObjectInspector(Double.class, ObjectInspectorFactory.ObjectInspectorOptions.JAVA);
                         break;
                     case TIMESTAMP:
-                        objectInspector = ObjectInspectorFactory.getReflectionObjectInspector(java.sql.Timestamp.class, ObjectInspectorFactory.ObjectInspectorOptions.JAVA);
+                        objectInspector = ObjectInspectorFactory.getReflectionObjectInspector(Timestamp.class, ObjectInspectorFactory.ObjectInspectorOptions.JAVA);
                         break;
                     case DATE:
                         objectInspector = ObjectInspectorFactory.getReflectionObjectInspector(java.sql.Date.class, ObjectInspectorFactory.ObjectInspectorOptions.JAVA);
@@ -695,6 +727,9 @@ public class HdfsWriterUtil {
                         break;
                     case ARRAY:
                         objectInspector = OrcStruct.createObjectInspector(TypeInfoFactory.getListTypeInfo(TypeInfoFactory.stringTypeInfo));
+                        break;
+                    case DECIMAL:
+                        objectInspector = ObjectInspectorFactory.getReflectionObjectInspector(HiveDecimal.class, ObjectInspectorFactory.ObjectInspectorOptions.JAVA);
                         break;
                     default:
                         throw DataXException
@@ -782,7 +817,10 @@ public class HdfsWriterUtil {
                                 recordList.add(new java.sql.Date(column.asDate().getTime()));
                                 break;
                             case TIMESTAMP:
-                                recordList.add(new java.sql.Timestamp(column.asDate().getTime()));
+                                recordList.add(Timestamp.ofEpochMilli(column.asDate().getTime()));
+                                break;
+                            case DECIMAL:
+                                recordList.add(HiveDecimal.create(new BigDecimal(rowData)));
                                 break;
                             default:
                                 throw DataXException
