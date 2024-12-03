@@ -817,7 +817,7 @@ public class HdfsWriterUtil {
                                 recordList.add(new java.sql.Date(column.asDate().getTime()));
                                 break;
                             case TIMESTAMP:
-                                recordList.add(Timestamp.ofEpochMilli(column.asDate().getTime()));
+                                recordList.add(Timestamp.valueOf(column.asString()));
                                 break;
                             case DECIMAL:
                                 recordList.add(HiveDecimal.create(new BigDecimal(rowData)));
