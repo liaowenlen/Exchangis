@@ -56,6 +56,7 @@ public class OracleDataxSubExchangisJobHandler extends AuthEnabledSubExchangisJo
      */
     private static final JobParamDefine<String> SOURCE_WHERE_CONDITION = JobParams.define(JobParamConstraints.WHERE);
 
+    private static final JobParamDefine<String> QUERY_SQL_CUSTOM = JobParams.define("connection[0].querySql[0]", JobParamConstraints.QUERY_SQL);
 
     /**
      * Query sql
@@ -87,7 +88,9 @@ public class OracleDataxSubExchangisJobHandler extends AuthEnabledSubExchangisJo
         JobParamSet paramSet = subExchangisJob.getRealmParams(SubExchangisJob.REALM_JOB_CONTENT_SOURCE);
         if (Objects.nonNull(paramSet)) {
             Arrays.asList(sourceMappings()).forEach(define -> paramSet.addNonNull(define.get(paramSet)));
-            paramSet.add(QUERY_SQL.newParam(subExchangisJob));
+            if (Objects.nonNull(paramSet.get(QUERY_SQL.getKey()))) {
+                paramSet.add(QUERY_SQL.newParam(subExchangisJob));
+            }
         }
     }
 
@@ -112,7 +115,7 @@ public class OracleDataxSubExchangisJobHandler extends AuthEnabledSubExchangisJo
 
     private JobParamDefine<?>[] sourceMappings() {
         return new JobParamDefine[]{USERNAME, PASSWORD, SOURCE_TABLE, SOURCE_WHERE_CONDITION,
-                SOURCE_HOST, SOURCE_PORT, SOURCE_SERVICE_NAME, SOURCE_PARAMS_MAP};
+                SOURCE_HOST, SOURCE_PORT, SOURCE_SERVICE_NAME, SOURCE_PARAMS_MAP, QUERY_SQL_CUSTOM};
     }
 
     public JobParamDefine<?>[] sinkMappings() {

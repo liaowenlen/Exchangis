@@ -253,9 +253,25 @@ public class SqoopExchangisEngineJobBuilder extends AbstractLoggingExchangisJobB
             MODE_RDBMS_PARAMS.getValue(job).get(JobParamConstraints.TABLE, String.class).getValue(), SubExchangisJob.class);
 
     /**
-     * Import: Query string in params, //TODO where to use query
+     * Import: Query string in params
      */
-    private static final JobParamDefine<String> QUERY_STRING = JobParams.define("sqoop.args.query", "query");
+    private static final JobParamDefine<String> QUERY_STRING = JobParams.define("sqoop.args.query", job -> {
+        if (MODE_ENUM.getValue(job) == MODE_TYPE.IMPORT) {
+            JobParam<String> query = MODE_RDBMS_PARAMS.getValue(job).get(JobParamConstraints.QUERY_SQL);
+            if (Objects.nonNull(query) && StringUtils.isNotBlank(query.getValue())) {
+                String sql = query.getValue();
+                if (!sql.matches(".*\\$CONDITIONS.*")) {
+                    throw new IllegalArgumentException(
+                            "" +
+                                    "使用sql语句来进行查找时必须添加where条件，且where条件后面必须带一个$CONDITIONS，" +
+                                    "例如：SELECT t.* FROM user_info AS t WHERE 'lisi'='lisi' AND $CONDITIONS"
+                    );
+                }
+                return sql;
+            }
+        }
+        return null;
+    }, SubExchangisJob.class);
 
     /**
      * Import: Where
@@ -572,6 +588,10 @@ public class SqoopExchangisEngineJobBuilder extends AbstractLoggingExchangisJobB
                     jobContent.put(definition.getKey(), String.valueOf(paramValue));
                 }
             }
+            if (jobContent.containsKey(QUERY_STRING.getKey())) {
+                jobContent.remove(WHERE_CLAUSE.getKey());
+                jobContent.remove(TABLE.getKey());
+            }
             engineJob.setName(inputJob.getName());
             engineJob.setCreateUser(inputJob.getCreateUser());
             return engineJob;
@@ -599,7 +619,7 @@ public class SqoopExchangisEngineJobBuilder extends AbstractLoggingExchangisJobB
                 EXPORT_DIR, UPDATE_KEY, UPDATE_MODE,
                 HCATALOG_DATABASE, HCATALOG_TABLE, HCATALOG_PARTITION_KEY, HCATALOG_PARTITION_VALUE,
                 HIVE_INPUT_FIELDS_TERMINATED_KEY, HIVE_INPUT_NULL_STRING, HIVE_INPUT_NULL_NON_STRING,
-                COLUMN_SERIAL,DEFINE_INSPECTION
+                COLUMN_SERIAL,DEFINE_INSPECTION, QUERY_STRING
         };
     }
 

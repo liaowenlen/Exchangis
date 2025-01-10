@@ -54,6 +54,11 @@ public class MySQLDataxSubExchangisJobHandler extends AuthEnabledSubExchangisJob
     private static final JobParamDefine<String> WHERE_CONDITION = JobParams.define(JobParamConstraints.WHERE);
 
     /**
+     * Query sql for custom
+     */
+    private static final JobParamDefine<String> QUERY_SQL_CUSTOM = JobParams.define("connection[0].querySql[0]", JobParamConstraints.QUERY_SQL);
+
+    /**
      * Query sql
      */
     private static final JobParamDefine<String> QUERY_SQL = JobParams.define("connection[0].querySql[0]", job ->{
@@ -82,7 +87,9 @@ public class MySQLDataxSubExchangisJobHandler extends AuthEnabledSubExchangisJob
         JobParamSet paramSet = subExchangisJob.getRealmParams(SubExchangisJob.REALM_JOB_CONTENT_SOURCE);
         if (Objects.nonNull(paramSet)){
             Arrays.asList(sourceMappings()).forEach(define -> paramSet.addNonNull(define.get(paramSet)));
-            paramSet.add(QUERY_SQL.newParam(subExchangisJob));
+            if (Objects.isNull(paramSet.get(QUERY_SQL.getKey()))) {
+                paramSet.add(QUERY_SQL.newParam(subExchangisJob));
+            }
         }
     }
 
@@ -107,7 +114,7 @@ public class MySQLDataxSubExchangisJobHandler extends AuthEnabledSubExchangisJob
 
     private JobParamDefine<?>[] sourceMappings(){
         return new JobParamDefine[]{USERNAME, PASSWORD, SOURCE_DATABASE,
-                SOURCE_HOST, SOURCE_PORT, SOURCE_PARAMS_MAP};
+                SOURCE_HOST, SOURCE_PORT, SOURCE_PARAMS_MAP, QUERY_SQL_CUSTOM};
     }
 
     public JobParamDefine<?>[] sinkMappings(){

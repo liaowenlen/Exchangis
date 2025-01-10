@@ -1,8 +1,8 @@
 package com.webank.wedatasphere.exchangis.datasource.core.vo;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ExchangisJobInfoContent {
@@ -19,6 +19,8 @@ public class ExchangisJobInfoContent {
     private ExchangisJobTransformsContent transforms;
 
     private List<ExchangisJobParamsContent.ExchangisJobParamsItem> settings;
+
+    private String contextID;
 
     public String getEngine() {
         return engine;
@@ -66,5 +68,13 @@ public class ExchangisJobInfoContent {
 
     public void setSubJobName(String subJobName) {
         this.subJobName = subJobName;
+    }
+
+    public String getContextID() {
+        return contextID;
+    }
+
+    public void setContextID(String contextID) {
+        this.contextID = contextID;
     }
 }
