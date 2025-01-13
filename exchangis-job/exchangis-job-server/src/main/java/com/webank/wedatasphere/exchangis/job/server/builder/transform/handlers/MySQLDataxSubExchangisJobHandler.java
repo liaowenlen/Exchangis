@@ -3,11 +3,13 @@ package com.webank.wedatasphere.exchangis.job.server.builder.transform.handlers;
 import com.webank.wedatasphere.exchangis.datasource.core.utils.Json;
 import com.webank.wedatasphere.exchangis.job.builder.ExchangisJobBuilderContext;
 import com.webank.wedatasphere.exchangis.job.domain.SubExchangisJob;
+import com.webank.wedatasphere.exchangis.job.domain.params.JobParam;
 import com.webank.wedatasphere.exchangis.job.domain.params.JobParamDefine;
 import com.webank.wedatasphere.exchangis.job.domain.params.JobParamSet;
 import com.webank.wedatasphere.exchangis.job.domain.params.JobParams;
 import com.webank.wedatasphere.exchangis.job.server.builder.JobParamConstraints;
 import com.webank.wedatasphere.exchangis.job.server.utils.SQLCommandUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.linkis.common.exception.ErrorException;
 
 import java.util.*;
@@ -87,7 +89,8 @@ public class MySQLDataxSubExchangisJobHandler extends AuthEnabledSubExchangisJob
         JobParamSet paramSet = subExchangisJob.getRealmParams(SubExchangisJob.REALM_JOB_CONTENT_SOURCE);
         if (Objects.nonNull(paramSet)){
             Arrays.asList(sourceMappings()).forEach(define -> paramSet.addNonNull(define.get(paramSet)));
-            if (Objects.isNull(paramSet.get(QUERY_SQL.getKey()))) {
+            JobParam<Object> querySqlJobParam = paramSet.get(QUERY_SQL.getKey());
+            if (Objects.isNull(querySqlJobParam) || StringUtils.isBlank((String) querySqlJobParam.getValue())) {
                 paramSet.add(QUERY_SQL.newParam(subExchangisJob));
             }
         }
