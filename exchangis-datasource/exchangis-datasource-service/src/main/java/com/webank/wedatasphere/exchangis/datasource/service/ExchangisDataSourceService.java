@@ -223,10 +223,10 @@ public class ExchangisDataSourceService extends AbstractDataSourceService implem
                     dto.setIcon(type.getIcon());
                     dto.setDescription(type.getDescription());
                     dto.setOption(type.getOption());
-                    if (sourceType == null || !sourceType.toLowerCase().equals(type.getName())) {
+//                    if (sourceType == null || !sourceType.toLowerCase().equals(type.getName())) {
                         //LOGGER.info("sourceType:{}, typename: {}", sourceType.toLowerCase(), type.getName());
                         dtos.add(dto);
-                    }
+//                    }
                 }
             }
         }
